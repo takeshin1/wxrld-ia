@@ -1,0 +1,17 @@
+{
+  "id": "./",
+  "name": "WXRLD.IA — UORDI",
+  "short_name": "WXRLD.IA",
+  "description": "Sua assistente financeira pessoal.",
+  "lang": "pt-BR",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f5f7f9",
+  "theme_color": "#101d2b",
+  "icons": [
+    {"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"},
+    {"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+  ]
+}

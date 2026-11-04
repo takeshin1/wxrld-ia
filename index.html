@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101d2b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="WXRLD.IA">
+  <meta name="description" content="Sua assistente financeira pessoal: registre gastos, receitas e acompanhe seu dinheiro.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css">
+  <title>WXRLD.IA — UORDI</title>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#inicio" aria-label="WXRLD.IA início">
+        <span class="brand-mark">W<span>.</span></span>
+        <span class="brand-copy"><strong>WXRLD<span>.IA</span></strong><small>SUA ASSISTENTE FINANCEIRA</small></span>
+      </a>
+      <button class="avatar" id="settingsShortcut" aria-label="Abrir configurações">U</button>
+    </header>
+
+    <main id="view" class="main-content">
+      <section class="page active" id="page-inicio">
+        <div class="welcome-row">
+          <div><p class="eyebrow" id="todayLabel">SEU DINHEIRO, SOB SEU CONTROLE</p><h1>Olá! <span class="wave">✦</span></h1><p class="muted">O que aconteceu com seu dinheiro?</p></div>
+          <div class="month-picker"><label for="monthSelect">PERÍODO</label><input id="monthSelect" type="month"></div>
+        </div>
+
+        <section class="balance-card">
+          <div class="balance-top"><span>Saldo estimado</span><span class="live-dot">● ATUALIZADO</span></div>
+          <div class="balance-value" id="balanceValue">R$ 0,00</div>
+          <div class="balance-foot"><span>Entradas − saídas + saldo inicial</span><button class="ghost-light" id="editStartingBalance">Ajustar saldo inicial ↗</button></div>
+          <div class="balance-stats">
+            <div><span class="stat-icon income-icon">↙</span><div><small>Receitas no mês</small><strong id="incomeValue">R$ 0,00</strong></div></div>
+            <div><span class="stat-icon expense-icon">↗</span><div><small>Despesas no mês</small><strong id="expenseValue">R$ 0,00</strong></div></div>
+          </div>
+        </section>
+
+        <section class="assistant-card">
+          <div class="assistant-heading"><span class="sparkle">✳</span><div><strong>Fale com a UORDI</strong><small>Registre uma movimentação naturalmente</small></div><span class="ai-chip">IA FINANCEIRA</span></div>
+          <form id="entryForm" class="entry-form">
+            <label class="sr-only" for="entryText">Descreva seu gasto ou receita</label>
+            <textarea id="entryText" rows="2" placeholder="Ex.: gastei R$ 35 no almoço hoje..."></textarea>
+            <div class="entry-actions"><button class="mic-button" type="button" id="voiceButton" aria-label="Registrar por voz"><span>🎙</span><span id="micText">Falar</span></button><button class="primary-button" type="submit">Interpretar <span>→</span></button></div>
+          </form>
+          <p class="privacy-note"><span>⌑</span> Seus lançamentos ficam salvos neste aparelho.</p>
+          <div id="voiceHelp" class="voice-help hidden">No iPhone, toque no campo de texto e use o microfone do teclado para ditar. Depois toque em <b>Interpretar</b>.</div>
+        </section>
+
+        <section id="draftPanel" class="draft-card hidden">
+          <div class="section-heading"><div><p class="eyebrow">CONFIRA ANTES DE SALVAR</p><h2>Entendi assim</h2></div><button class="icon-button" id="discardDraft" aria-label="Descartar">✕</button></div>
+          <div class="draft-grid">
+            <label>Tipo<select id="draftType"><option value="expense">Despesa</option><option value="income">Receita</option></select></label>
+            <label>Valor (R$)<input id="draftAmount" type="number" min="0.01" step="0.01" inputmode="decimal"></label>
+            <label class="full">Descrição<input id="draftDescription" type="text" maxlength="90"></label>
+            <label>Categoria<select id="draftCategory"></select></label>
+            <label>Data<input id="draftDate" type="date"></label>
+          </div>
+          <button class="primary-button wide" id="saveDraft">Salvar movimentação <span>✓</span></button>
+        </section>
+
+        <section class="quick-stats">
+          <div class="section-heading"><div><p class="eyebrow">VISÃO GERAL</p><h2>Seu mês em números</h2></div><button class="text-button" data-page="relatorios">Ver tudo ↗</button></div>
+          <div class="mini-grid">
+            <article class="mini-card"><span class="mini-icon blue">◷</span><small>Gastos hoje</small><strong id="todayExpense">R$ 0,00</strong></article>
+            <article class="mini-card"><span class="mini-icon purple">▦</span><small>Transações</small><strong id="transactionCount">0</strong></article>
+          </div>
+          <div class="section-heading recent-heading"><div><p class="eyebrow">MOVIMENTAÇÕES</p><h2>Últimos registros</h2></div><button class="text-button" data-page="historico">Ver histórico ↗</button></div>
+          <div id="recentList" class="transaction-list"></div>
+        </section>
+      </section>
+
+      <section class="page" id="page-historico">
+        <div class="page-title"><p class="eyebrow">TUDO EM UM SÓ LUGAR</p><h1>Histórico</h1><p class="muted">Consulte e organize suas movimentações.</p></div>
+        <div class="filter-card">
+          <input id="historySearch" type="search" placeholder="Buscar por descrição ou categoria..." aria-label="Buscar movimentações">
+          <div class="filter-row"><select id="historyType"><option value="all">Todas</option><option value="expense">Despesas</option><option value="income">Receitas</option></select><select id="historyCategory"><option value="all">Todas as categorias</option></select><input id="historyMonth" type="month" aria-label="Filtrar por mês"></div>
+        </div>
+        <div id="historySummary" class="history-summary"></div>
+        <div id="historyList" class="transaction-list"></div>
+      </section>
+
+      <section class="page" id="page-relatorios">
+        <div class="page-title"><p class="eyebrow">ENTENDA SEUS HÁBITOS</p><h1>Relatórios</h1><p class="muted">Veja para onde seu dinheiro está indo.</p></div>
+        <div class="report-month"><label for="reportMonth">MÊS ANALISADO</label><input id="reportMonth" type="month"></div>
+        <div class="report-highlight"><small>Total de despesas</small><strong id="reportTotal">R$ 0,00</strong><span id="monthComparison">Sem dados para comparação.</span></div>
+        <section class="report-section"><div class="section-heading"><div><p class="eyebrow">DISTRIBUIÇÃO</p><h2>Por categoria</h2></div></div><div id="categoryReport" class="category-report"></div></section>
+        <section class="report-section"><div class="section-heading"><div><p class="eyebrow">ÚLTIMOS 7 DIAS</p><h2>Ritmo de gastos</h2></div></div><div id="weekReport" class="week-report"></div></section>
+      </section>
+
+      <section class="page" id="page-ajustes">
+        <div class="page-title"><p class="eyebrow">PREFERÊNCIAS E DADOS</p><h1>Configurações</h1><p class="muted">Cuide do seu espaço financeiro.</p></div>
+        <section class="settings-card"><div class="settings-title"><span class="settings-symbol">R$</span><div><strong>Saldo inicial</strong><small>Valor que você já tinha antes dos registros.</small></div></div><div class="inline-setting"><input id="settingsBalance" type="number" step="0.01" inputmode="decimal" placeholder="0,00"><button class="secondary-button" id="saveSettingsBalance">Salvar</button></div></section>
+        <section class="settings-card"><div class="settings-title"><span class="settings-symbol">☷</span><div><strong>Categorias</strong><small>Adicione uma categoria personalizada.</small></div></div><form id="categoryForm" class="inline-setting"><input id="newCategory" type="text" maxlength="30" placeholder="Nova categoria"><button class="secondary-button" type="submit">Adicionar</button></form><div id="customCategories" class="custom-categories"></div></section>
+        <section class="settings-card"><div class="settings-title"><span class="settings-symbol">⇧</span><div><strong>Backup e exportação</strong><small>Exporte seus dados para guardar uma cópia.</small></div></div><div class="settings-buttons"><button class="secondary-button" id="exportJson">Baixar backup (.json)</button><button class="secondary-button" id="exportCsv">Exportar planilha (.csv)</button><label class="secondary-button file-button">Restaurar backup<input type="file" id="importBackup" accept="application/json,.json"></label></div></section>
+        <section class="settings-card danger-card"><div class="settings-title"><span class="settings-symbol">!</span><div><strong>Apagar todos os dados</strong><small>Esta ação não poderá ser desfeita.</small></div></div><button class="danger-button" id="clearData">Apagar dados deste aparelho</button></section>
+        <p class="about-note"><b>WXRLD.IA · UORDI</b><br>Versão inicial 1.0 · Seus dados são armazenados localmente neste navegador. Não há conta ou sincronização em nuvem nesta versão.</p>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Navegação principal">
+      <button class="nav-item active" data-page="inicio"><span>⌂</span><small>Início</small></button>
+      <button class="nav-item" data-page="historico"><span>≡</span><small>Histórico</small></button>
+      <button class="nav-item" data-page="relatorios"><span>▥</span><small>Relatórios</small></button>
+      <button class="nav-item" data-page="ajustes"><span>⚙</span><small>Ajustes</small></button>
+    </nav>
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <dialog id="editDialog" class="edit-dialog">
+      <form method="dialog" id="editForm">
+        <div class="dialog-head"><div><p class="eyebrow">MOVIMENTAÇÃO</p><h2>Editar registro</h2></div><button class="icon-button" value="cancel" aria-label="Fechar">✕</button></div>
+        <input type="hidden" id="editId">
+        <div class="draft-grid">
+          <label>Tipo<select id="editType"><option value="expense">Despesa</option><option value="income">Receita</option></select></label>
+          <label>Valor (R$)<input id="editAmount" type="number" min="0.01" step="0.01" required></label>
+          <label class="full">Descrição<input id="editDescription" type="text" maxlength="90" required></label>
+          <label>Categoria<select id="editCategory"></select></label>
+          <label>Data<input id="editDate" type="date" required></label>
+        </div>
+        <div class="dialog-actions"><button class="secondary-button" value="cancel">Cancelar</button><button class="primary-button" id="updateTransaction" value="default">Salvar alterações</button></div>
+      </form>
+    </dialog>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
