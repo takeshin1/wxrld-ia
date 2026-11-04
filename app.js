@@ -2,7 +2,7 @@
 const DB_NAME='wxrld-ia-db', DB_VERSION=1, STORE='transactions';
 const DEFAULT_CATEGORIES=['Salário','Investimentos','Renda extra','Alimentação','Mercado','Transporte','Combustível','Moradia','Contas e boletos','Saúde','Academia e esportes','Lazer','Compras','Tecnologia','Educação','Assinaturas','Viagens','Outros'];
 const ICONS={'Alimentação':'🍽️','Mercado':'🛒','Transporte':'🚗','Combustível':'⛽','Moradia':'🏠','Contas e boletos':'🧾','Saúde':'💊','Academia e esportes':'🏋️','Lazer':'🎟️','Compras':'🛍️','Tecnologia':'💻','Educação':'📚','Assinaturas':'🔁','Viagens':'✈️','Outros':'✳️','Salário':'💼','Investimentos':'📈','Renda extra':'✨'};
-let db, transactions=[], customCategories=[], draft=null, toastTimer;
+let db, transactions=[], customCategories=[], draft=null, toastTimer, activeRecognition=null, voiceTimeoutId=null;
 const $=id=>document.getElementById(id);
 const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n)||0);
 const localISO=(d=new Date())=>{const x=new Date(d.getTime()-d.getTimezoneOffset()*60000);return x.toISOString().slice(0,10)};
@@ -15,7 +15,13 @@ function dbDelete(id){return new Promise((resolve,reject)=>{const t=db.transacti
 async function refresh(){transactions=await dbAll();transactions.sort((a,b)=>b.date.localeCompare(a.date)||(b.createdAt||0)-(a.createdAt||0));renderAll();}
 function getCats(){return [...DEFAULT_CATEGORIES,...customCategories];}
 function setCats(){const opts=getCats().map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');$('draftCategory').innerHTML=opts;$('editCategory').innerHTML=opts;$('historyCategory').innerHTML='<option value="all">Todas as categorias</option>'+opts;}
-function showToast(message){const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),2800);}
+function showToast(message){const el=$('toast');el.textContent=message;el.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),3200);}
+function applyTheme(theme){const dark=theme==='dark';document.documentElement.dataset.theme=dark?'dark':'light';document.documentElement.style.colorScheme=dark?'dark':'light';const meta=document.querySelector('meta[name="theme-color"]');if(meta)meta.content=dark?'#061F17':'#F3F0E6';const button=$('themeToggle');if(button){button.setAttribute('aria-checked',String(dark));button.setAttribute('aria-label',dark?'Ativar tema claro':'Ativar tema escuro');button.title=dark?'Ativar tema claro':'Ativar tema escuro';}}
+function toggleTheme(){const next=document.documentElement.dataset.theme==='dark'?'light':'dark';localStorage.setItem('wxrldTheme',next);applyTheme(next);}
+function isIOSDevice(){return /iPad|iPhone|iPod/i.test(navigator.userAgent)||(/MacIntel/.test(navigator.platform)&&navigator.maxTouchPoints>1);}
+function showVoiceHelp(message){$('voiceHelp').innerHTML=message;$('voiceHelp').classList.remove('hidden');}
+function resetVoiceButton(){clearTimeout(voiceTimeoutId);voiceTimeoutId=null;$('voiceButton').classList.remove('recording');$('micText').textContent=isIOSDevice()?'Ditar':'Falar';}
+function focusEntryForDictation(){const field=$('entryText');field.focus();try{field.setSelectionRange(field.value.length,field.value.length);}catch(_){}}
 function parseAmount(text){
   const re=/(?:r\$\s*)?((?:\d{1,3}(?:\.\d{3})+|\d+)(?:,\d{1,2})?|\d+(?:\.\d{1,2})?)\s*(?:reais?|rs?\$)?/ig;
   const matches=[...text.matchAll(re)]; if(!matches.length)return null;
@@ -65,7 +71,7 @@ function renderTx(t,includeActions=false){const icon=ICONS[t.category]||'✳️'
 function renderDashboard(){const month=$('monthSelect').value||monthISO();const list=monthData(month);const income=sum(list,'income'),expense=sum(list,'expense');const opening=Number(localStorage.getItem('wxrldStartingBalance')||0);const allNet=sum(transactions,'income')-sum(transactions,'expense');
  $('balanceValue').textContent=money(opening+allNet);$('incomeValue').textContent=money(income);$('expenseValue').textContent=money(expense);
  const today=localISO();$('todayExpense').textContent=money(sum(transactions.filter(t=>t.date===today),'expense'));$('transactionCount').textContent=String(list.length);
- const recent=transactions.slice(0,5);$('recentList').innerHTML=recent.length?recent.map(t=>renderTx(t)).join(''):'<div class="empty-state">Nenhuma movimentação registrada ainda.<br>Conte à UORDI o que aconteceu com seu dinheiro.</div>';
+ const recent=transactions.slice(0,5);$('recentList').innerHTML=recent.length?recent.map(t=>renderTx(t)).join(''):'<div class="empty-state">Nenhuma movimentação registrada ainda.<br>Conte à wxrld o que aconteceu com seu dinheiro.</div>';
 }
 function renderHistory(){const q=$('historySearch').value.trim().toLocaleLowerCase('pt-BR'),type=$('historyType').value,cat=$('historyCategory').value,month=$('historyMonth').value;const list=transactions.filter(t=>(!q||(t.description+' '+t.category).toLocaleLowerCase('pt-BR').includes(q))&&(type==='all'||t.type===type)&&(cat==='all'||t.category===cat)&&(!month||t.date.startsWith(month)));
  $('historySummary').textContent=`${list.length} registro(s) · ${money(sum(list,'income'))} em receitas · ${money(sum(list,'expense'))} em despesas`;
@@ -87,9 +93,91 @@ function exportCSV(){const rows=[['Data','Tipo','Descrição','Categoria','Valor
 function download(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 async function importJSON(file){try{const data=JSON.parse(await file.text());if(data.app!=='WXRLD.IA'||!Array.isArray(data.transactions))throw new Error('Arquivo inválido.');if(!confirm(`Restaurar ${data.transactions.length} movimentações? Os registros atuais com o mesmo ID poderão ser substituídos.`))return;for(const t of data.transactions){if(!t||!['expense','income'].includes(t.type)||!Number.isFinite(Number(t.amount))||!t.date||!t.description)continue;await dbPut({id:Number.isInteger(t.id)?t.id:undefined,type:t.type,amount:Number(t.amount),description:String(t.description),category:String(t.category||'Outros'),date:String(t.date),createdAt:t.createdAt||Date.now()});}if(Number.isFinite(Number(data.startingBalance)))localStorage.setItem('wxrldStartingBalance',String(data.startingBalance));if(Array.isArray(data.customCategories)){customCategories=data.customCategories.filter(x=>typeof x==='string'&&!DEFAULT_CATEGORIES.includes(x));localStorage.setItem('wxrldCustomCategories',JSON.stringify(customCategories));}setCats();await refresh();showToast('Backup restaurado.');}catch(e){showToast('Não foi possível restaurar: '+e.message);}}
 function removeCustomCategory(name){if(!confirm(`Excluir a categoria “${name}”? Lançamentos existentes não serão apagados.`))return;customCategories=customCategories.filter(c=>c!==name);localStorage.setItem('wxrldCustomCategories',JSON.stringify(customCategories));setCats();renderSettings();showToast('Categoria removida.');}
-function startVoice(){const Speech=window.SpeechRecognition||window.webkitSpeechRecognition;if(!Speech){$('voiceHelp').classList.remove('hidden');$('entryText').focus();showToast('Use o microfone do teclado do iPhone para ditar.');return;}try{const rec=new Speech();rec.lang='pt-BR';rec.interimResults=false;rec.maxAlternatives=1;$('voiceButton').classList.add('recording');$('micText').textContent='Ouvindo...';rec.onresult=e=>{$('entryText').value=(e.results[0][0].transcript||'').trim();$('voiceHelp').classList.add('hidden');};rec.onerror=()=>{$('voiceHelp').classList.remove('hidden');showToast('Não foi possível reconhecer a voz. Use o ditado do teclado.');};rec.onend=()=>{$('voiceButton').classList.remove('recording');$('micText').textContent='Falar';};rec.start();}catch(e){$('voiceHelp').classList.remove('hidden');$('entryText').focus();showToast('Use o ditado do teclado do iPhone.');}}
-function bind(){document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>openPage(b.dataset.page)));$('settingsShortcut').addEventListener('click',()=>openPage('ajustes'));$('entryForm').addEventListener('submit',e=>{e.preventDefault();const txt=$('entryText').value.trim();if(!txt){showToast('Digite ou dite uma movimentação primeiro.');return;}const parsed=parseEntry(txt);if(parsed.error){showToast(parsed.error);return;}showDraft(parsed);});$('voiceButton').addEventListener('click',startVoice);$('saveDraft').addEventListener('click',saveCurrentDraft);$('discardDraft').addEventListener('click',()=>{$('draftPanel').classList.add('hidden');draft=null;});$('monthSelect').addEventListener('change',renderDashboard);$('historySearch').addEventListener('input',renderHistory);['historyType','historyCategory','historyMonth'].forEach(id=>$(id).addEventListener('change',renderHistory));$('reportMonth').addEventListener('change',renderReports);
+function startVoice(){
+  // No iPhone, o ditado do próprio teclado é mais confiável que SpeechRecognition
+  // em versões do Safari nas quais a API pode iniciar e nunca emitir eventos.
+  if(isIOSDevice()){
+    resetVoiceButton();
+    showVoiceHelp('No iPhone: toque no <b>microfone do teclado</b>, dite sua movimentação e toque em <b>Concluído</b>. Depois toque em <b>Interpretar</b>. Se o microfone não aparecer, ative Ditado em Ajustes → Geral → Teclado.');
+    showToast('Use o microfone do teclado do iPhone para ditar.');
+    focusEntryForDictation();
+    return;
+  }
+  const Speech=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!Speech){
+    showVoiceHelp('O reconhecimento por voz não está disponível neste navegador. Toque no campo de texto e use o ditado do teclado, se disponível.');
+    showToast('Reconhecimento de voz indisponível neste navegador.');
+    focusEntryForDictation();
+    return;
+  }
+  if(activeRecognition){try{activeRecognition.abort();}catch(_){}activeRecognition=null;}
+  resetVoiceButton();
+  let receivedResult=false, hadError=false;
+  try{
+    const rec=new Speech();
+    activeRecognition=rec;
+    rec.lang='pt-BR';
+    rec.interimResults=false;
+    rec.maxAlternatives=1;
+    $('voiceButton').classList.add('recording');
+    $('micText').textContent='Ouvindo...';
+    $('voiceHelp').classList.add('hidden');
+    // Watchdog: alguns navegadores móveis não disparam onresult, onerror nem onend.
+    voiceTimeoutId=setTimeout(()=>{
+      if(activeRecognition!==rec)return;
+      hadError=true;
+      try{rec.abort();}catch(_){}
+      activeRecognition=null;
+      resetVoiceButton();
+      showVoiceHelp('A captura de voz não respondeu. Tente novamente ou digite/dite pelo microfone do teclado.');
+      showToast('A captura demorou demais e foi encerrada.');
+    },12000);
+    rec.onstart=()=>{if(activeRecognition===rec){$('micText').textContent='Ouvindo...';}};
+    rec.onresult=e=>{
+      const transcript=Array.from(e.results||[]).map(r=>r[0]?.transcript||'').join(' ').trim();
+      if(!transcript)return;
+      receivedResult=true;
+      $('entryText').value=transcript;
+      $('voiceHelp').classList.add('hidden');
+      $('micText').textContent='Recebido';
+      $('voiceButton').classList.remove('recording');
+      clearTimeout(voiceTimeoutId);
+      voiceTimeoutId=setTimeout(()=>{if(activeRecognition===rec){try{rec.abort();}catch(_){}activeRecognition=null;resetVoiceButton();}},1800);
+      showToast('Voz convertida em texto. Confira e toque em Interpretar.');
+    };
+    rec.onnomatch=()=>{
+      hadError=true;
+      showVoiceHelp('Não consegui entender o áudio. Fale mais perto do microfone ou use o ditado do teclado.');
+      showToast('Não consegui entender. Tente novamente.');
+    };
+    rec.onerror=e=>{
+      hadError=true;
+      let message='A captura de voz falhou. Tente novamente ou use o ditado do teclado.';
+      if(e.error==='not-allowed'||e.error==='service-not-allowed')message='O microfone ou reconhecimento de voz foi bloqueado. Verifique a permissão do navegador e tente novamente.';
+      else if(e.error==='no-speech')message='Não detectei sua fala. Toque em Falar e tente novamente.';
+      else if(e.error==='audio-capture')message='Não consegui acessar o microfone deste aparelho.';
+      else if(e.error==='network')message='O serviço de reconhecimento está sem conexão. Use o ditado do teclado.';
+      showVoiceHelp(message);
+      showToast(message);
+      resetVoiceButton();
+    };
+    rec.onend=()=>{
+      if(activeRecognition===rec)activeRecognition=null;
+      resetVoiceButton();
+      if(!receivedResult&&!hadError){
+        showVoiceHelp('A gravação terminou, mas não recebi texto. Tente novamente ou use o ditado do teclado.');
+      }
+    };
+    rec.start();
+  }catch(error){
+    activeRecognition=null;
+    resetVoiceButton();
+    showVoiceHelp('Não foi possível iniciar o microfone neste navegador. Verifique as permissões ou use o ditado do teclado.');
+    showToast('Não foi possível iniciar o reconhecimento de voz.');
+  }
+}
+function bind(){$('themeToggle').addEventListener('click',toggleTheme);$('micText').textContent=isIOSDevice()?'Ditar':'Falar';$('voiceButton').setAttribute('aria-label',isIOSDevice()?'Usar ditado do teclado do iPhone':'Registrar por voz');document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>openPage(b.dataset.page)));$('settingsShortcut').addEventListener('click',()=>openPage('ajustes'));$('entryForm').addEventListener('submit',e=>{e.preventDefault();const txt=$('entryText').value.trim();if(!txt){showToast('Digite ou dite uma movimentação primeiro.');return;}const parsed=parseEntry(txt);if(parsed.error){showToast(parsed.error);return;}showDraft(parsed);});$('voiceButton').addEventListener('click',startVoice);$('saveDraft').addEventListener('click',saveCurrentDraft);$('discardDraft').addEventListener('click',()=>{$('draftPanel').classList.add('hidden');draft=null;});$('monthSelect').addEventListener('change',renderDashboard);$('historySearch').addEventListener('input',renderHistory);['historyType','historyCategory','historyMonth'].forEach(id=>$(id).addEventListener('change',renderHistory));$('reportMonth').addEventListener('change',renderReports);
  $('historyMonth').value=monthISO();$('monthSelect').value=monthISO();$('reportMonth').value=monthISO();
  document.addEventListener('click',async e=>{const edit=e.target.closest('.edit-tx');if(edit)openEdit(edit.dataset.id);const del=e.target.closest('.delete-tx');if(del&&confirm('Excluir esta movimentação?')){await dbDelete(del.dataset.id);await refresh();showToast('Movimentação excluída.');}const cat=e.target.closest('[data-category]');if(cat)removeCustomCategory(cat.dataset.category);});
  $('editForm').addEventListener('submit',updateEdit);$('editStartingBalance').addEventListener('click',()=>{openPage('ajustes');$('settingsBalance').focus();});$('saveSettingsBalance').addEventListener('click',()=>{const v=Number($('settingsBalance').value||0);if(!Number.isFinite(v)){showToast('Informe um saldo válido.');return;}localStorage.setItem('wxrldStartingBalance',String(v));renderDashboard();showToast('Saldo inicial atualizado.');});$('categoryForm').addEventListener('submit',e=>{e.preventDefault();const c=$('newCategory').value.trim();if(!c)return;if(getCats().some(x=>x.toLocaleLowerCase('pt-BR')===c.toLocaleLowerCase('pt-BR'))){showToast('Essa categoria já existe.');return;}customCategories.push(c);localStorage.setItem('wxrldCustomCategories',JSON.stringify(customCategories));$('newCategory').value='';setCats();renderSettings();showToast('Categoria adicionada.');});$('exportJson').addEventListener('click',exportJSON);$('exportCsv').addEventListener('click',exportCSV);$('importBackup').addEventListener('change',e=>{if(e.target.files[0])importJSON(e.target.files[0]);e.target.value='';});$('clearData').addEventListener('click',async()=>{if(!confirm('Tem certeza? Isso apagará todas as movimentações e o saldo inicial deste aparelho. Exporte um backup antes, se precisar.'))return;const t=db.transaction(STORE,'readwrite');t.objectStore(STORE).clear();await new Promise((res,rej)=>{t.oncomplete=res;t.onerror=()=>rej(t.error)});localStorage.removeItem('wxrldStartingBalance');await refresh();showToast('Dados apagados.');});}
-(async function init(){try{db=await openDB();customCategories=JSON.parse(localStorage.getItem('wxrldCustomCategories')||'[]').filter(x=>typeof x==='string');setCats();bind();await refresh();if(navigator.storage?.persist)navigator.storage.persist().catch(()=>{});if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});$('todayLabel').textContent=new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'numeric',month:'long'}).format(new Date()).toLocaleUpperCase('pt-BR');}catch(e){console.error(e);showToast('Não foi possível iniciar o armazenamento local.');}})();
+(async function init(){try{applyTheme(localStorage.getItem('wxrldTheme')||'light');db=await openDB();customCategories=JSON.parse(localStorage.getItem('wxrldCustomCategories')||'[]').filter(x=>typeof x==='string');setCats();bind();await refresh();if(navigator.storage?.persist)navigator.storage.persist().catch(()=>{});if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});$('todayLabel').textContent=new Intl.DateTimeFormat('pt-BR',{weekday:'long',day:'numeric',month:'long'}).format(new Date()).toLocaleUpperCase('pt-BR');}catch(e){console.error(e);showToast('Não foi possível iniciar o armazenamento local.');}})();

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#101d2b">
+  <meta name="theme-color" content="#F3F0E6">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="WXRLD.IA">
@@ -11,17 +11,24 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css">
-  <title>WXRLD.IA — UORDI</title>
+  <link rel="stylesheet" href="styles.css?v=1.2">
+  <title>WXRLD.IA — Controle financeiro pessoal</title>
 </head>
 <body>
   <div class="app-shell">
     <header class="topbar">
       <a class="brand" href="#inicio" aria-label="WXRLD.IA início">
-        <span class="brand-mark">W<span>.</span></span>
+        <img class="brand-mark" src="icon-512.png?v=1.2" alt="" aria-hidden="true">
         <span class="brand-copy"><strong>WXRLD<span>.IA</span></strong><small>SUA ASSISTENTE FINANCEIRA</small></span>
       </a>
-      <button class="avatar" id="settingsShortcut" aria-label="Abrir configurações">U</button>
+      <div class="topbar-actions">
+        <button class="theme-toggle" id="themeToggle" type="button" role="switch" aria-checked="false" aria-label="Ativar tema escuro" title="Alternar tema claro e escuro">
+          <span class="moon-thumb" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false"><path d="M20.2 15.3A8.6 8.6 0 0 1 8.7 3.8 8.7 8.7 0 1 0 20.2 15.3Z"/><path d="M17.2 3.2v3.2M15.6 4.8h3.2M20.2 8.1v2.2M19.1 9.2h2.2"/></svg>
+          </span>
+        </button>
+        <button class="avatar" id="settingsShortcut" aria-label="Abrir configurações">W</button>
+      </div>
     </header>
 
     <main id="view" class="main-content">
@@ -42,14 +49,14 @@
         </section>
 
         <section class="assistant-card">
-          <div class="assistant-heading"><span class="sparkle">✳</span><div><strong>Fale com a UORDI</strong><small>Registre uma movimentação naturalmente</small></div><span class="ai-chip">IA FINANCEIRA</span></div>
+          <div class="assistant-heading"><span class="sparkle">✳</span><div><strong>Fale com a wxrld</strong><small>Registre uma movimentação naturalmente</small></div><span class="ai-chip">IA FINANCEIRA</span></div>
           <form id="entryForm" class="entry-form">
             <label class="sr-only" for="entryText">Descreva seu gasto ou receita</label>
             <textarea id="entryText" rows="2" placeholder="Ex.: gastei R$ 35 no almoço hoje..."></textarea>
             <div class="entry-actions"><button class="mic-button" type="button" id="voiceButton" aria-label="Registrar por voz"><span>🎙</span><span id="micText">Falar</span></button><button class="primary-button" type="submit">Interpretar <span>→</span></button></div>
           </form>
           <p class="privacy-note"><span>⌑</span> Seus lançamentos ficam salvos neste aparelho.</p>
-          <div id="voiceHelp" class="voice-help hidden">No iPhone, toque no campo de texto e use o microfone do teclado para ditar. Depois toque em <b>Interpretar</b>.</div>
+          <div id="voiceHelp" class="voice-help hidden" role="status" aria-live="polite">No iPhone, toque no microfone do teclado para ditar. Quando terminar, toque em <b>Interpretar</b>.</div>
         </section>
 
         <section id="draftPanel" class="draft-card hidden">
@@ -99,7 +106,7 @@
         <section class="settings-card"><div class="settings-title"><span class="settings-symbol">☷</span><div><strong>Categorias</strong><small>Adicione uma categoria personalizada.</small></div></div><form id="categoryForm" class="inline-setting"><input id="newCategory" type="text" maxlength="30" placeholder="Nova categoria"><button class="secondary-button" type="submit">Adicionar</button></form><div id="customCategories" class="custom-categories"></div></section>
         <section class="settings-card"><div class="settings-title"><span class="settings-symbol">⇧</span><div><strong>Backup e exportação</strong><small>Exporte seus dados para guardar uma cópia.</small></div></div><div class="settings-buttons"><button class="secondary-button" id="exportJson">Baixar backup (.json)</button><button class="secondary-button" id="exportCsv">Exportar planilha (.csv)</button><label class="secondary-button file-button">Restaurar backup<input type="file" id="importBackup" accept="application/json,.json"></label></div></section>
         <section class="settings-card danger-card"><div class="settings-title"><span class="settings-symbol">!</span><div><strong>Apagar todos os dados</strong><small>Esta ação não poderá ser desfeita.</small></div></div><button class="danger-button" id="clearData">Apagar dados deste aparelho</button></section>
-        <p class="about-note"><b>WXRLD.IA · UORDI</b><br>Versão inicial 1.0 · Seus dados são armazenados localmente neste navegador. Não há conta ou sincronização em nuvem nesta versão.</p>
+        <p class="about-note"><b>WXRLD.IA</b><br>Versão 1.1 · Seus dados são armazenados localmente neste navegador. Não há conta ou sincronização em nuvem nesta versão.</p>
       </section>
     </main>
 
@@ -126,6 +133,6 @@
       </form>
     </dialog>
   </div>
-  <script src="app.js"></script>
+  <script src="app.js?v=1.2"></script>
 </body>
 </html>
