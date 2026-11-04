@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=1.7">
+  <link rel="stylesheet" href="styles.css?v=1.8">
   <title>WXRLD.IA — Controle financeiro pessoal</title>
 </head>
 <body>
@@ -103,16 +103,24 @@
         <div class="page-title"><p class="eyebrow">PREFERÊNCIAS E DADOS</p><h1>Configurações</h1><p class="muted">Cuide do seu espaço financeiro.</p></div>
         <section class="settings-card"><div class="settings-title"><span class="settings-symbol">R$</span><div><strong>Saldo inicial</strong><small>Valor que você já tinha antes dos registros.</small></div></div><div class="inline-setting"><input id="settingsBalance" type="number" step="0.01" inputmode="decimal" placeholder="0,00"><button class="secondary-button" id="saveSettingsBalance">Salvar</button></div></section>
         <section class="settings-card voice-settings-card">
-          <div class="settings-title"><span class="settings-symbol">♫</span><div><strong>Voz da wxrld</strong><small>Ouça as vozes disponíveis no iPhone e escolha sua favorita.</small></div></div>
-          <p class="voice-settings-intro">Procure uma voz feminina em português do Brasil. Toque em Ouvir para comparar; a escolha fica salva neste aparelho.</p>
-          <div id="voiceOptions" class="voice-options" aria-live="polite"><p class="voice-loading">Carregando vozes disponíveis…</p></div>
-          <button class="secondary-button voice-refresh" id="refreshVoices" type="button">Atualizar lista de vozes</button>
-          <p class="voice-settings-note" id="voiceSettingsNote">As opções dependem das vozes instaladas no iPhone e disponibilizadas pelo Safari. A wxrld não baixa nem envia gravações.</p>
+          <div class="settings-title"><span class="settings-symbol">♫</span><div><strong>Voz humana da wxrld</strong><small>Use a voz feminina escolhida na ElevenLabs.</small></div></div>
+          <p class="voice-settings-intro">A voz natural é gerada pela ElevenLabs. Cole aqui o endereço do seu Cloudflare Worker depois de publicá-lo. A chave da ElevenLabs fica somente no servidor.</p>
+          <label class="voice-endpoint-label" for="voiceApiUrl">Endereço do serviço de voz</label>
+          <input id="voiceApiUrl" type="url" inputmode="url" placeholder="https://seu-worker.seu-subdominio.workers.dev/api/speech" autocomplete="url">
+          <div class="settings-buttons voice-settings-actions">
+            <button class="secondary-button" id="saveVoiceApiUrl" type="button">Salvar conexão</button>
+            <button class="primary-button" id="testHumanVoice" type="button">▶ Testar voz da wxrld</button>
+          </div>
+          <p class="voice-settings-note" id="voiceSettingsNote">Voice ID: 4DQIi8DdLBye9y3COV8R · Modelo: Eleven v4. Para ativar, configure o servidor conforme o arquivo LEIA-ME-ELEVENLABS.txt.</p>
+          <details class="system-voices-details"><summary>Vozes do iPhone (alternativa)</summary>
+            <div id="voiceOptions" class="voice-options" aria-live="polite"><p class="voice-loading">Carregando vozes disponíveis…</p></div>
+            <button class="secondary-button voice-refresh" id="refreshVoices" type="button">Atualizar vozes do iPhone</button>
+          </details>
         </section>
         <section class="settings-card"><div class="settings-title"><span class="settings-symbol">☷</span><div><strong>Categorias</strong><small>Adicione uma categoria personalizada.</small></div></div><form id="categoryForm" class="inline-setting"><input id="newCategory" type="text" maxlength="30" placeholder="Nova categoria"><button class="secondary-button" type="submit">Adicionar</button></form><div id="customCategories" class="custom-categories"></div></section>
         <section class="settings-card"><div class="settings-title"><span class="settings-symbol">⇧</span><div><strong>Backup e exportação</strong><small>Exporte seus dados para guardar uma cópia.</small></div></div><div class="settings-buttons"><button class="secondary-button" id="exportJson">Baixar backup (.json)</button><button class="secondary-button" id="exportCsv">Exportar planilha (.csv)</button><label class="secondary-button file-button">Restaurar backup<input type="file" id="importBackup" accept="application/json,.json"></label></div></section>
         <section class="settings-card danger-card"><div class="settings-title"><span class="settings-symbol">!</span><div><strong>Apagar todos os dados</strong><small>Esta ação não poderá ser desfeita.</small></div></div><button class="danger-button" id="clearData">Apagar dados deste aparelho</button></section>
-        <p class="about-note"><b>WXRLD.IA</b><br>Versão 1.7 · Seus dados são armazenados localmente neste navegador. Não há conta ou sincronização em nuvem nesta versão.</p>
+        <p class="about-note"><b>WXRLD.IA</b><br>Versão 1.8 · Seus dados são armazenados localmente neste navegador. Não há conta ou sincronização em nuvem nesta versão.</p>
       </section>
     </main>
 
@@ -139,6 +147,6 @@
       </form>
     </dialog>
   </div>
-  <script src="app.js?v=1.7"></script>
+  <script src="app.js?v=1.8"></script>
 </body>
 </html>

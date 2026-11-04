@@ -299,3 +299,11 @@ html[data-theme="dark"] .voice-play,html[data-theme="dark"] .voice-refresh{backg
 html[data-theme="dark"] .voice-choose{background:#EED6AF;color:#123B28}
 html[data-theme="dark"] .voice-choose:disabled{background:#315640;color:#EED6AF}
 @media(max-width:370px){.voice-option{align-items:flex-start;flex-direction:column}.voice-option-actions{width:100%}.voice-option-actions button{flex:1}}
+/* WXRLD.IA v1.8 — configuração da voz ElevenLabs */
+.voice-endpoint-label{display:block;font-size:10px;font-weight:700;color:var(--muted);margin:8px 0 6px}
+#voiceApiUrl{display:block;width:100%;min-width:0;border:1px solid var(--line);border-radius:9px;padding:11px 10px;background:var(--paper);color:var(--ink);font:11px 'DM Sans';outline:none}
+#voiceApiUrl:focus{border-color:#6f9c83;box-shadow:0 0 0 3px rgba(26,154,117,.1)}
+.voice-settings-actions{margin-top:10px}
+.voice-settings-actions .primary-button,.voice-settings-actions .secondary-button{flex:1;min-height:40px}
+.system-voices-details{margin-top:15px;border-top:1px solid var(--line);padding-top:12px}
+.system-voices-details summary{font-size:10px;font-weight:700;color:var(--muted);cursor:pointer}

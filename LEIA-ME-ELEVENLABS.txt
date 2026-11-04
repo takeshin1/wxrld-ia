@@ -1,0 +1,37 @@
+WXRLD.IA v1.8 — Integração de voz ElevenLabs
+
+IMPORTANTE
+- A API Key NÃO deve ser inserida no index.html, app.js, GitHub ou enviada por mensagem.
+- O Worker abaixo mantém a chave no servidor Cloudflare.
+- Voice ID configurado: 4DQIi8DdLBye9y3COV8R
+- Modelo: eleven_v4
+
+PARTE A — Publicar o aplicativo
+1. Envie os arquivos do ZIP para a raiz do repositório GitHub Pages, substituindo os arquivos correspondentes.
+2. Preserve o CNAME do seu repositório. Este pacote não contém CNAME.
+3. Faça Commit changes.
+
+PARTE B — Criar o serviço seguro no Cloudflare
+1. Entre em https://dash.cloudflare.com/ e abra Workers & Pages.
+2. Crie um Worker chamado wxrld-ia-voice.
+3. Copie todo o conteúdo de worker.js e cole no editor do Worker, substituindo o exemplo. Salve e faça Deploy.
+4. Abra Settings → Variables and Secrets (ou Settings → Secrets). Adicione um secret com o nome ELEVENLABS_API_KEY e cole sua chave da ElevenLabs no campo Value. Salve. Faça novo Deploy se o painel solicitar.
+5. O endereço do Worker será parecido com https://wxrld-ia-voice.SEU-SUBDOMINIO.workers.dev. O endereço usado no app deve terminar em /api/speech.
+
+PARTE C — Conectar no iPhone
+1. Abra a WXRLD.IA já atualizada.
+2. Vá em Configurações → Voz humana da wxrld.
+3. No campo Endereço do serviço de voz, informe https://wxrld-ia-voice.SEU-SUBDOMINIO.workers.dev/api/speech (substitua pelo endereço real).
+4. Toque em Salvar conexão.
+5. Toque em Testar voz da wxrld.
+
+Depois de salvar o endereço, as falas automáticas da wxrld passam a usar a voz da ElevenLabs. Se apagar o endereço, o app volta à voz nativa do iPhone.
+
+TESTE E CUSTOS
+- Cada reprodução envia texto à ElevenLabs e consome créditos conforme a sua conta/plano. Evite testes repetidos com textos longos.
+- O Worker limita cada texto a 1.800 caracteres.
+- Se receber erro 401, confira a Secret ELEVENLABS_API_KEY. Erro 402/429 pode indicar limite/créditos/plano. Erro 422 pode indicar configuração incompatível com a voz ou modelo.
+- A chave fica no Secret do Cloudflare; não a compartilhe.
+
+OBSERVAÇÃO
+O aplicativo continua usando o reconhecimento de fala do navegador para captar sua voz. Esta integração substitui a voz de resposta (TTS), não o reconhecimento/transcrição.
