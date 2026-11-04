@@ -1,0 +1,13 @@
+WXRLD.IA v1.7 — atualização da demonstração de vozes
+
+IMPORTANTE: este ZIP contém os arquivos diretamente na raiz, prontos para enviar à raiz do repositório GitHub Pages.
+
+1. Extraia o ZIP no computador.
+2. Abra o repositório takeshin1/wxrld-ia no GitHub, branch main.
+3. Use Add file > Upload files.
+4. Envie os 8 arquivos extraídos para a raiz do repositório, substituindo os arquivos existentes.
+5. NÃO apague nem substitua CNAME.
+6. Faça Commit changes.
+7. Aguarde o GitHub Pages publicar e feche/reabra a PWA no iPhone.
+
+A tela Ajustes deve mostrar a seção “Voz da wxrld”. Os nomes e a quantidade de vozes dependem do que o Safari/iOS disponibilizar. Toque em “Atualizar lista de vozes” se a lista estiver vazia.
