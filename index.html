@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=1.4">
+  <link rel="stylesheet" href="styles.css?v=1.6">
   <title>WXRLD.IA — Controle financeiro pessoal</title>
 </head>
 <body>
@@ -78,15 +78,6 @@
           <button class="primary-button wide" id="saveDraft">Salvar movimentação <span>✓</span></button>
         </section>
 
-        <section class="quick-stats">
-          <div class="section-heading"><div><p class="eyebrow">VISÃO GERAL</p><h2>Seu mês em números</h2></div><button class="text-button" data-page="relatorios">Ver tudo ↗</button></div>
-          <div class="mini-grid">
-            <article class="mini-card"><span class="mini-icon blue">◷</span><small>Gastos hoje</small><strong id="todayExpense">R$ 0,00</strong></article>
-            <article class="mini-card"><span class="mini-icon purple">▦</span><small>Transações</small><strong id="transactionCount">0</strong></article>
-          </div>
-          <div class="section-heading recent-heading"><div><p class="eyebrow">MOVIMENTAÇÕES</p><h2>Últimos registros</h2></div><button class="text-button" data-page="historico">Ver histórico ↗</button></div>
-          <div id="recentList" class="transaction-list"></div>
-        </section>
       </section>
 
       <section class="page" id="page-historico">
@@ -103,6 +94,7 @@
         <div class="page-title"><p class="eyebrow">ENTENDA SEUS HÁBITOS</p><h1>Relatórios</h1><p class="muted">Veja para onde seu dinheiro está indo.</p></div>
         <div class="report-month"><label for="reportMonth">MÊS ANALISADO</label><input id="reportMonth" type="month"></div>
         <div class="report-highlight"><small>Total de despesas</small><strong id="reportTotal">R$ 0,00</strong><span id="monthComparison">Sem dados para comparação.</span></div>
+        <section class="report-overview"><div class="section-heading"><div><p class="eyebrow">VISÃO GERAL</p><h2>Seu mês em números</h2></div></div><div class="mini-grid"><article class="mini-card"><span class="mini-icon blue">◷</span><small>Gastos hoje</small><strong id="todayExpense">R$ 0,00</strong></article><article class="mini-card"><span class="mini-icon purple">▦</span><small>Transações no mês</small><strong id="transactionCount">0</strong></article></div></section>
         <section class="report-section"><div class="section-heading"><div><p class="eyebrow">DISTRIBUIÇÃO</p><h2>Por categoria</h2></div></div><div id="categoryReport" class="category-report"></div></section>
         <section class="report-section"><div class="section-heading"><div><p class="eyebrow">ÚLTIMOS 7 DIAS</p><h2>Ritmo de gastos</h2></div></div><div id="weekReport" class="week-report"></div></section>
       </section>
@@ -140,6 +132,6 @@
       </form>
     </dialog>
   </div>
-  <script src="app.js?v=1.4"></script>
+  <script src="app.js?v=1.6"></script>
 </body>
 </html>

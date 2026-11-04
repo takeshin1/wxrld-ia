@@ -1,20 +1,20 @@
-# WXRLD.IA
+# WXRLD.IA — UORDI
 
-Aplicativo PWA de controle financeiro pessoal em português brasileiro.
+PWA de controle financeiro pessoal em português brasileiro.
 
-## Versão 1.3
-- Interface com identidade verde-floresta e bege champanhe.
-- Entrada de texto pelo campo de mensagem.
-- Botão circular de microfone para reconhecimento de fala do navegador, quando disponível.
-- Botão circular de balão para enviar a mensagem digitada.
-- Resposta falada em português brasileiro usando a síntese de voz do dispositivo, quando disponível.
-- Após reconhecer uma fala, a wxrld repete os dados interpretados e pede confirmação na tela antes de salvar.
-- Os registros permanecem no IndexedDB local do navegador.
+## Atualização v1.4
+- Tela inicial compacta: dashboard com saldo, receitas, despesas e assistente; sem lista de movimentações nem bloco de visão geral.
+- Histórico continua exclusivamente na aba Histórico.
+- Indicadores de visão geral foram movidos para Relatórios.
+- Resposta falada da wxrld aprimorada: ao tocar no microfone, a assistente inicia com “Pode falar. Estou ouvindo.” e depois começa a captura, para favorecer a liberação de áudio no iOS.
+- Confirmação de movimentações permanece obrigatória antes de salvar.
+- Dados continuam no IndexedDB local; não limpar dados do Safari ao atualizar.
 
 ## Publicar no GitHub Pages
-Envie os arquivos desta pasta para a raiz do repositório e habilite GitHub Pages na branch `main`, pasta `/ (root)`. Preserve qualquer arquivo `CNAME` que já esteja configurado no repositório.
+Envie os arquivos desta pasta para a raiz do repositório, substituindo os arquivos existentes. Preserve o arquivo `CNAME` já existente no repositório (se houver). Faça commit e aguarde a publicação do GitHub Pages.
 
-## Observação sobre voz no iPhone
-O botão de microfone usa a API de reconhecimento de fala que o Safari disponibilizar (`SpeechRecognition`/`webkitSpeechRecognition`). A disponibilidade depende da versão do iOS/Safari e das permissões. Se o navegador não disponibilizar essa API, o app informa isso claramente; não simula uma gravação. A resposta falada usa `speechSynthesis` quando suportada.
+## Instalar no iPhone
+Abra a URL do GitHub Pages no Safari → Compartilhar → Adicionar à Tela de Início → habilite “Abrir como App da Web”.
 
-A interpretação financeira desta versão é local, baseada em regras; não é um modelo generativo conectado. O aplicativo não envia as transações para um servidor.
+## Observação sobre voz
+A síntese de fala usa `speechSynthesis` do Safari/iOS e depende das vozes e permissões disponíveis no aparelho. O reconhecimento de fala também depende do suporte do Safari. Se o Safari não disponibilizar reconhecimento, a wxrld informa isso e permite registrar por texto.
