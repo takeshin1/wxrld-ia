@@ -170,3 +170,20 @@ html[data-theme="dark"] .dialog-head .icon-button{background:#1B4431;color:#D9DF
 html[data-theme="dark"] .text-button{color:#C9D7B4}
 html[data-theme="dark"] .toast{background:#EED6AF;color:#123B28}
 @media(prefers-reduced-motion:reduce){.theme-toggle,.moon-thumb{transition:none}}
+
+
+/* Entrada por voz e chat: dois controles circulares, sem depender do ditado do teclado. */
+.entry-actions.voice-actions{justify-content:flex-end;gap:12px;margin-top:12px}
+.round-action{width:54px;height:54px;min-height:54px;padding:0;border:1px solid #D8E2D4;border-radius:50%;display:grid;place-items:center;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease,background .15s ease}
+.round-action svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.round-action:active{transform:scale(.94)}
+.round-action:focus-visible{outline:3px solid rgba(49,91,61,.28);outline-offset:3px}
+.mic-button{background:#E8EEE3;color:#315B3D;box-shadow:0 4px 12px rgba(20,61,39,.08)}
+.chat-button{background:#0B4A30;color:#EED6AF;border-color:#0B4A30;box-shadow:0 6px 15px rgba(7,63,38,.2)}
+.mic-button.recording{background:#F3E5D8;color:#A35F43;border-color:#D9BCA5;animation:pulse 1.2s infinite}
+.voice-help{font-size:12px;line-height:1.55}
+html[data-theme="dark"] .round-action{border-color:#315640}
+html[data-theme="dark"] .mic-button{background:#1C4431;color:#EED6AF}
+html[data-theme="dark"] .chat-button{background:#EED6AF;color:#123B28;border-color:#EED6AF}
+html[data-theme="dark"] .mic-button.recording{background:#57382F;color:#F0C1A9;border-color:#8B5B49}
+@media(max-width:380px){.round-action{width:50px;height:50px;min-height:50px}}
