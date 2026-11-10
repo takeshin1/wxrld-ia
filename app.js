@@ -145,29 +145,130 @@ function renderVoiceOptions(){
 function refreshVoiceOptions(){if('speechSynthesis' in window){window.speechSynthesis.getVoices();setTimeout(renderVoiceOptions,250);setTimeout(renderVoiceOptions,900);}else renderVoiceOptions();}
 if('speechSynthesis' in window){window.speechSynthesis.addEventListener?.('voiceschanged',renderVoiceOptions);}
 function startVoice(){
-  if(activeRecognition){try{activeRecognition.abort();}catch(_){}activeRecognition=null;resetVoiceButton();return;}
+  if(activeRecognition){
+    try{activeRecognition.stop();}catch(_){}
+    activeRecognition=null;
+    clearTimeout(voiceTimeoutId);
+    voiceTimeoutId=null;
+    resetVoiceButton();
+    return;
+  }
+
   const Speech=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!Speech){showVoiceHelp('Este Safari não disponibilizou reconhecimento de fala para a página. Você pode digitar sua movimentação e enviar pelo botão de conversa.');showToast('Reconhecimento de voz indisponível neste Safari.');speakWx('Não consegui acessar o reconhecimento de voz neste navegador. Você pode escrever sua movimentação e enviar pelo botão de conversa.');return;}
-  const beginRecognition=()=>{
-    if(activeRecognition)return;
-    resetVoiceButton();let receivedResult=false,hadError=false;
-    try{
-      const rec=new Speech();activeRecognition=rec;rec.lang='pt-BR';rec.interimResults=false;rec.maxAlternatives=1;
-      $('voiceButton').classList.add('recording');$('voiceButton').setAttribute('aria-label','Parar gravação');$('voiceHelp').textContent='Estou ouvindo. Fale sua movimentação; vou repetir o que entendi antes de salvar.';$('voiceHelp').classList.remove('hidden');
-      voiceTimeoutId=setTimeout(()=>{if(activeRecognition!==rec)return;hadError=true;try{rec.abort();}catch(_){}activeRecognition=null;resetVoiceButton();showVoiceHelp('A gravação demorou demais e foi encerrada. Toque no microfone para tentar novamente.');showToast('Gravação encerrada por tempo limite.');speakWx('Não consegui captar sua fala. Vamos tentar novamente?');},15000);
-      rec.onstart=()=>{if(activeRecognition===rec)showToast('Estou ouvindo…');};
-      rec.onresult=e=>{const transcript=Array.from(e.results||[]).map(r=>r[0]?.transcript||'').join(' ').trim();if(!transcript)return;receivedResult=true;$('entryText').value=transcript;clearTimeout(voiceTimeoutId);voiceTimeoutId=null;try{rec.stop();}catch(_){}activeRecognition=null;resetVoiceButton();$('voiceHelp').classList.add('hidden');const parsed=parseEntry(transcript);if(parsed.error){showVoiceHelp(parsed.error);speakWx('Não consegui identificar o valor da movimentação. Pode repetir incluindo o valor?');showToast('Não identifiquei o valor.');return;}showDraft(parsed,{spoken:true});};
-      rec.onnomatch=()=>{hadError=true;showVoiceHelp('Não consegui entender o que foi dito. Tente falar novamente, incluindo o valor.');speakWx('Desculpe, não entendi. Pode repetir com o valor da movimentação?');};
-      rec.onerror=e=>{hadError=true;let msg='O microfone não conseguiu captar sua fala. Tente novamente.';if(e.error==='not-allowed'||e.error==='service-not-allowed')msg='A permissão do microfone ou do reconhecimento de voz foi bloqueada. Verifique os ajustes do Safari.';else if(e.error==='no-speech')msg='Não detectei sua fala. Toque no microfone e fale depois que aparecer Estou ouvindo.';else if(e.error==='audio-capture')msg='Não consegui acessar o microfone do iPhone.';else if(e.error==='network')msg='O reconhecimento de voz está sem conexão. Tente novamente quando estiver online.';showVoiceHelp(msg);showToast(msg);speakWx(msg);resetVoiceButton();};
-      rec.onend=()=>{clearTimeout(voiceTimeoutId);voiceTimeoutId=null;if(activeRecognition===rec)activeRecognition=null;resetVoiceButton();if(!receivedResult&&!hadError){showVoiceHelp('A gravação terminou, mas não recebi palavras. Tente novamente e fale um pouco mais perto do microfone.');speakWx('Não recebi sua fala. Pode tentar novamente?');}};
-      rec.start();
-    }catch(error){activeRecognition=null;resetVoiceButton();showVoiceHelp('Não foi possível iniciar o microfone. Confira a permissão do Safari e tente novamente.');showToast('Não foi possível iniciar o microfone.');speakWx('Não consegui iniciar o microfone. Confira a permissão do Safari.');}
-  };
-  // A primeira resposta é iniciada diretamente pelo toque do usuário; no iOS isso ajuda a liberar áudio falado.
-  if('speechSynthesis' in window&&window.SpeechSynthesisUtterance){showVoiceHelp('A wxrld vai falar e depois ouvir sua movimentação.');speakWx('Pode falar. Estou ouvindo.',beginRecognition);}else beginRecognition();
+  if(!Speech){
+    const msg='O reconhecimento de voz não está disponível neste navegador. No iPhone, use o microfone do teclado para ditar no campo de texto.';
+    showVoiceHelp(msg);
+    showToast('Reconhecimento de voz indisponível neste Safari.');
+    return;
+  }
+
+  let receivedResult=false;
+  let hadError=false;
+  let rec;
+  try{
+    rec=new Speech();
+    activeRecognition=rec;
+    rec.lang='pt-BR';
+    rec.interimResults=false;
+    rec.maxAlternatives=1;
+    rec.continuous=false;
+
+    $('voiceButton').classList.add('recording');
+    $('voiceButton').setAttribute('aria-label','Parar gravação');
+    showVoiceHelp('Estou ouvindo. Fale sua movimentação agora.');
+
+    rec.onstart=()=>{
+      if(activeRecognition===rec){
+        showVoiceHelp('Estou ouvindo. Fale sua movimentação agora.');
+        showToast('Microfone ativo. Pode falar.');
+      }
+    };
+
+    rec.onresult=e=>{
+      const transcript=Array.from(e.results||[])
+        .map(r=>r[0]?.transcript||'')
+        .join(' ').trim();
+      if(!transcript)return;
+      receivedResult=true;
+      $('entryText').value=transcript;
+      clearTimeout(voiceTimeoutId);
+      voiceTimeoutId=null;
+      try{rec.stop();}catch(_){}
+      if(activeRecognition===rec)activeRecognition=null;
+      resetVoiceButton();
+      $('voiceHelp').classList.add('hidden');
+      const parsed=parseEntry(transcript);
+      if(parsed.error){
+        showVoiceHelp(parsed.error);
+        showToast('Não identifiquei o valor. Tente falar novamente.');
+        speakWx('Não consegui identificar o valor da movimentação. Pode repetir incluindo o valor?');
+        return;
+      }
+      showDraft(parsed,{spoken:true});
+    };
+
+    rec.onnomatch=()=>{
+      hadError=true;
+      showVoiceHelp('Não consegui entender. Tente falar novamente, incluindo o valor.');
+      showToast('Não entendi sua fala.');
+    };
+
+    rec.onerror=e=>{
+      hadError=true;
+      clearTimeout(voiceTimeoutId);
+      voiceTimeoutId=null;
+      let msg='O reconhecimento de voz falhou. Tente novamente.';
+      if(e.error==='not-allowed'||e.error==='service-not-allowed'){
+        msg='O Safari ou o iPhone bloqueou o reconhecimento de voz. Confira a permissão do microfone e tente novamente.';
+      }else if(e.error==='no-speech'){
+        msg='Nenhuma fala foi detectada. Toque no microfone e comece a falar assim que aparecer “Estou ouvindo”.';
+      }else if(e.error==='audio-capture'){
+        msg='O navegador não conseguiu acessar o microfone. Feche outros apps que possam estar usando o áudio e tente novamente.';
+      }else if(e.error==='network'){
+        msg='O serviço de reconhecimento de voz está indisponível ou sem conexão. Tente novamente mais tarde.';
+      }
+      showVoiceHelp(msg);
+      showToast(msg);
+      if(activeRecognition===rec)activeRecognition=null;
+      resetVoiceButton();
+    };
+
+    rec.onend=()=>{
+      clearTimeout(voiceTimeoutId);
+      voiceTimeoutId=null;
+      if(activeRecognition===rec)activeRecognition=null;
+      resetVoiceButton();
+      if(!receivedResult&&!hadError){
+        showVoiceHelp('A gravação terminou sem reconhecer palavras. Toque no microfone e fale uma frase curta, por exemplo: “gastei 35 reais no almoço”.');
+      }
+    };
+
+    // Importante no iPhone: iniciar o reconhecimento diretamente no toque,
+    // sem esperar uma fala sintetizada terminar.
+    rec.start();
+
+    // Proteção contra sessões que ficam abertas sem retornar resultado.
+    voiceTimeoutId=setTimeout(()=>{
+      if(activeRecognition!==rec)return;
+      hadError=true;
+      try{rec.abort();}catch(_){}
+      activeRecognition=null;
+      voiceTimeoutId=null;
+      resetVoiceButton();
+      showVoiceHelp('Não recebi sua fala a tempo. Toque no microfone e tente novamente.');
+      showToast('Tempo de escuta encerrado.');
+    },20000);
+  }catch(error){
+    if(voiceTimeoutId){clearTimeout(voiceTimeoutId);voiceTimeoutId=null;}
+    activeRecognition=null;
+    resetVoiceButton();
+    const msg='Não foi possível iniciar o reconhecimento de voz neste navegador. Use o microfone do teclado do iPhone para ditar no campo de texto.';
+    showVoiceHelp(msg);
+    showToast(msg);
+  }
 }
 
-function bind(){$('themeToggle').addEventListener('click',toggleTheme);document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>openPage(b.dataset.page)));$('settingsShortcut').addEventListener('click',()=>openPage('ajustes'));$('entryForm').addEventListener('submit',e=>{e.preventDefault();unlockWxVoice();const txt=$('entryText').value.trim();if(!txt){showToast('Digite ou dite uma movimentação primeiro.');return;}const parsed=parseEntry(txt);if(parsed.error){showToast(parsed.error);speakWx(parsed.error);return;}showDraft(parsed,{spoken:true});});$('voiceButton').addEventListener('click',startVoice);$('saveDraft').addEventListener('click',saveCurrentDraft);$('discardDraft').addEventListener('click',()=>{$('draftPanel').classList.add('hidden');draft=null;});$('monthSelect').addEventListener('change',renderDashboard);$('historySearch').addEventListener('input',renderHistory);['historyType','historyCategory','historyMonth'].forEach(id=>$(id).addEventListener('change',renderHistory));$('reportMonth').addEventListener('change',renderReports);
+function bind(){$('themeToggle').addEventListener('click',toggleTheme);document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>openPage(b.dataset.page)));$('settingsShortcut').addEventListener('click',()=>openPage('ajustes'));$('entryForm').addEventListener('submit',e=>{e.preventDefault();const txt=$('entryText').value.trim();if(!txt){showToast('Digite ou dite uma movimentação primeiro.');return;}const parsed=parseEntry(txt);if(parsed.error){showToast(parsed.error);speakWx(parsed.error);return;}showDraft(parsed,{spoken:true});});$('voiceButton').addEventListener('click',startVoice);$('saveDraft').addEventListener('click',saveCurrentDraft);$('discardDraft').addEventListener('click',()=>{$('draftPanel').classList.add('hidden');draft=null;});$('monthSelect').addEventListener('change',renderDashboard);$('historySearch').addEventListener('input',renderHistory);['historyType','historyCategory','historyMonth'].forEach(id=>$(id).addEventListener('change',renderHistory));$('reportMonth').addEventListener('change',renderReports);
  $('historyMonth').value=monthISO();$('monthSelect').value=monthISO();$('reportMonth').value=monthISO();
  document.addEventListener('click',async e=>{const edit=e.target.closest('.edit-tx');if(edit)openEdit(edit.dataset.id);const del=e.target.closest('.delete-tx');if(del&&confirm('Excluir esta movimentação?')){await dbDelete(del.dataset.id);await refresh();showToast('Movimentação excluída.');}const cat=e.target.closest('[data-category]');if(cat)removeCustomCategory(cat.dataset.category);});
  $('editForm').addEventListener('submit',updateEdit);$('editStartingBalance').addEventListener('click',()=>{openPage('ajustes');$('settingsBalance').focus();});$('saveSettingsBalance').addEventListener('click',()=>{const v=Number($('settingsBalance').value||0);if(!Number.isFinite(v)){showToast('Informe um saldo válido.');return;}localStorage.setItem('wxrldStartingBalance',String(v));renderDashboard();showToast('Saldo inicial atualizado.');});$('categoryForm').addEventListener('submit',e=>{e.preventDefault();const c=$('newCategory').value.trim();if(!c)return;if(getCats().some(x=>x.toLocaleLowerCase('pt-BR')===c.toLocaleLowerCase('pt-BR'))){showToast('Essa categoria já existe.');return;}customCategories.push(c);localStorage.setItem('wxrldCustomCategories',JSON.stringify(customCategories));$('newCategory').value='';setCats();renderSettings();showToast('Categoria adicionada.');});$('exportJson').addEventListener('click',exportJSON);$('exportCsv').addEventListener('click',exportCSV);$('refreshVoices').addEventListener('click',refreshVoiceOptions);$('voiceApiUrl').value=localStorage.getItem('wxrldElevenEndpoint')||DEFAULT_ELEVEN_ENDPOINT;$('saveVoiceApiUrl').addEventListener('click',()=>{const value=$('voiceApiUrl').value.trim().replace(/\/$/,'');if(value&&!/^https:\/\//i.test(value)){showToast('Use um endereço HTTPS válido.');return;}localStorage.setItem('wxrldElevenEndpoint',value);showToast(value?'Conexão da voz salva neste aparelho.':'Conexão removida.');});$('testHumanVoice').addEventListener('click',()=>{const value=$('voiceApiUrl').value.trim().replace(/\/$/,'');if(value)localStorage.setItem('wxrldElevenEndpoint',value);speakHumanVoice('Oii! Sou eu, a wxrld! Pode deixar que eu cuido dos seus registros. E prometo não julgar aquela comprinha por impulso... pelo menos não em voz alta!');});$('importBackup').addEventListener('change',e=>{if(e.target.files[0])importJSON(e.target.files[0]);e.target.value='';});$('clearData').addEventListener('click',async()=>{if(!confirm('Tem certeza? Isso apagará todas as movimentações e o saldo inicial deste aparelho. Exporte um backup antes, se precisar.'))return;const t=db.transaction(STORE,'readwrite');t.objectStore(STORE).clear();await new Promise((res,rej)=>{t.oncomplete=res;t.onerror=()=>rej(t.error)});localStorage.removeItem('wxrldStartingBalance');await refresh();showToast('Dados apagados.');});}
