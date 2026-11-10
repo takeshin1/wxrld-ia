@@ -26,6 +26,7 @@ function focusEntryForDictation(){const field=$('entryText');field.focus();try{f
 function parseAmount(text){
   const re=/(?:r\$\s*)?((?:\d{1,3}(?:\.\d{3})+|\d+)(?:,\d{1,2})?|\d+(?:\.\d{1,2})?)\s*(?:reais?|rs?\$)?/ig;
   const matches=[...text.matchAll(re)]; if(!matches.length)return null;
+  // A number preceded by R$ or followed by reais is preferred; otherwise use the first numeric amount.
   let m=matches.find(x=>/r\s*\$/i.test(x[0])||/reais?/i.test(x[0]))||matches[0];
   let raw=m[1];
   if(raw.includes(',')&&raw.includes('.')) raw=raw.replace(/\./g,'').replace(',','.');
@@ -127,7 +128,7 @@ async function speakHumanVoice(message,onEnd){
   }catch(error){console.error('ElevenLabs TTS:',error);showToast(error.message||'Não foi possível conectar à voz humana.');if(typeof onEnd==='function')onEnd();return false;}
 }
 function speakWx(message,onEnd){
-  if((localStorage.getItem('wxrldElevenEndpoint')||DEFAULT_ELEVEN_ENDPOINT).trim())return speakHumanVoice(message,onEnd);
+  if(localStorage.getItem('wxrldElevenEndpoint'))return speakHumanVoice(message,onEnd);
   const voice=selectedVoice();const rate=Number(localStorage.getItem('wxrldVoiceRate')||.94);const pitch=Number(localStorage.getItem('wxrldVoicePitch')||1.04);
   return speakWithVoice(message,voice,rate,pitch,onEnd);
 }
@@ -162,6 +163,7 @@ function startVoice(){
       rec.start();
     }catch(error){activeRecognition=null;resetVoiceButton();showVoiceHelp('Não foi possível iniciar o microfone. Confira a permissão do Safari e tente novamente.');showToast('Não foi possível iniciar o microfone.');speakWx('Não consegui iniciar o microfone. Confira a permissão do Safari.');}
   };
+  // A primeira resposta é iniciada diretamente pelo toque do usuário; no iOS isso ajuda a liberar áudio falado.
   if('speechSynthesis' in window&&window.SpeechSynthesisUtterance){showVoiceHelp('A wxrld vai falar e depois ouvir sua movimentação.');speakWx('Pode falar. Estou ouvindo.',beginRecognition);}else beginRecognition();
 }
 
