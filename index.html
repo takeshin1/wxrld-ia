@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#F3F0E6">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
   <meta name="apple-mobile-web-app-title" content="WXRLD.IA">
   <meta name="description" content="Sua assistente financeira pessoal: registre gastos, receitas e acompanhe seu dinheiro.">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=1.9">
+  <link rel="stylesheet" href="styles.css?v=2.1">
   <title>WXRLD.IA — Controle financeiro pessoal</title>
 </head>
 <body>
@@ -49,7 +49,7 @@
         </section>
 
         <section class="assistant-card">
-          <div class="assistant-heading"><span class="sparkle">✳</span><div><strong>Fale com a wxrld</strong><small>Registre uma movimentação naturalmente</small></div><span class="ai-chip">IA FINANCEIRA</span></div>
+          <div class="assistant-heading"><span class="sparkle">✳</span><div><strong>Fale com a wxrld</strong></div><span class="ai-chip">IA FINANCEIRA</span></div>
           <form id="entryForm" class="entry-form">
             <label class="sr-only" for="entryText">Escreva o que aconteceu com seu dinheiro</label>
             <textarea id="entryText" rows="2" placeholder="Escreva: gastei R$ 35 no almoço..."></textarea>
@@ -62,7 +62,6 @@
               </button>
             </div>
           </form>
-          <p class="privacy-note"><span>⌑</span> Seus lançamentos ficam salvos neste aparelho.</p>
           <div id="voiceHelp" class="voice-help hidden" role="status" aria-live="polite">No iPhone, toque no microfone do teclado para ditar. Quando terminar, toque em <b>Interpretar</b>.</div>
         </section>
 
@@ -147,6 +146,6 @@
       </form>
     </dialog>
   </div>
-  <script src="app.js?v=1.9"></script>
+  <script src="app.js?v=2.1"></script>
 </body>
 </html>

@@ -331,11 +331,14 @@ body {
   min-height: 100dvh;
 }
 .topbar {
-  box-sizing: content-box;
-  height: calc(76px + env(safe-area-inset-top));
+  box-sizing: border-box;
+  height: calc(68px + env(safe-area-inset-top));
+  min-height: calc(68px + env(safe-area-inset-top));
   padding-top: env(safe-area-inset-top);
   padding-left: max(22px, env(safe-area-inset-left));
   padding-right: max(22px, env(safe-area-inset-right));
+  position: relative;
+  isolation: isolate;
 }
 .main-content {
   padding-left: max(20px, env(safe-area-inset-left));
@@ -366,5 +369,38 @@ button, a, label, summary, [role="button"] {
   .main-content {
     padding-left: max(16px, env(safe-area-inset-left));
     padding-right: max(16px, env(safe-area-inset-right));
+  }
+}
+
+
+/* WXRLD.IA v2.0 — iPhone status-bar clearance and cleaner assistant card */
+@media (max-width: 639px) {
+  .topbar {
+    box-sizing: border-box;
+    height: calc(70px + env(safe-area-inset-top));
+    min-height: calc(70px + env(safe-area-inset-top));
+    padding-top: env(safe-area-inset-top);
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+    align-items: center;
+  }
+  .brand, .topbar-actions { position: relative; z-index: 1; }
+  #page-inicio .assistant-heading { margin-bottom: 11px; }
+  #page-inicio .assistant-heading > div { gap: 0; }
+  #page-inicio .assistant-heading small,
+  #page-inicio .privacy-note { display: none !important; }
+}
+
+
+/* WXRLD.IA v2.1 — remove somente os textos auxiliares e reforça safe area iPhone */
+#page-inicio .assistant-heading small,
+#page-inicio .privacy-note { display: none !important; }
+@media (max-width: 639px) {
+  .topbar {
+    box-sizing: border-box;
+    height: calc(72px + max(44px, env(safe-area-inset-top)));
+    min-height: calc(72px + max(44px, env(safe-area-inset-top)));
+    padding-top: max(44px, env(safe-area-inset-top));
+    align-items: center;
   }
 }
