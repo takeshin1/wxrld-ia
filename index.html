@@ -11,7 +11,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="styles.css?v=2.5">
+  <link rel="stylesheet" href="styles.css?v=2.6">
   <title>WXRLD.IA — Controle financeiro pessoal</title>
 </head>
 <body>
@@ -53,6 +53,7 @@
           <form id="entryForm" class="entry-form">
             <label class="sr-only" for="entryText">Escreva o que aconteceu com seu dinheiro</label>
             <textarea id="entryText" rows="2" placeholder="Escreva: gastei R$ 35 no almoço..."></textarea>
+            <div id="voiceHelp" class="voice-help hidden" role="status" aria-live="polite">No iPhone, toque no microfone do teclado para ditar. Quando terminar, toque em <b>Interpretar</b>.</div>
             <div class="entry-actions voice-actions">
               <button class="round-action mic-button" type="button" id="voiceButton" aria-label="Falar com a wxrld" title="Falar com a wxrld">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3m-4 0h8"/></svg>
@@ -62,7 +63,6 @@
               </button>
             </div>
           </form>
-          <div id="voiceHelp" class="voice-help hidden" role="status" aria-live="polite">No iPhone, toque no microfone do teclado para ditar. Quando terminar, toque em <b>Interpretar</b>.</div>
         </section>
 
         <section id="draftPanel" class="draft-card hidden">
@@ -146,6 +146,6 @@
       </form>
     </dialog>
   </div>
-  <script src="app.js?v=2.5"></script>
+  <script src="app.js?v=2.6"></script>
 </body>
 </html>

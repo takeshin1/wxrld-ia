@@ -700,3 +700,90 @@ button, a, label, summary, [role="button"] {
   #page-inicio .assistant-heading { gap: 6px; }
   #page-inicio .ai-chip { display: none; }
 }
+
+
+/* WXRLD.IA v2.6 — controles de voz no fluxo do cartão, abaixo do aviso.
+   Não usar position:fixed nos botões: eles nunca podem cobrir voiceHelp/toast. */
+@media (max-width: 639px) {
+  #page-inicio .assistant-card {
+    display: flex !important;
+    flex-direction: column !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+  }
+  #page-inicio .entry-form {
+    display: flex !important;
+    flex-direction: column !important;
+    min-width: 0 !important;
+    width: 100% !important;
+  }
+  #page-inicio .entry-form textarea {
+    order: 1 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  #page-inicio .entry-form .voice-help {
+    order: 2 !important;
+    position: static !important;
+    display: block;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    margin: 9px 0 0 !important;
+    padding: 10px 12px !important;
+    font-size: 12px !important;
+    line-height: 1.45 !important;
+    overflow-wrap: anywhere !important;
+    z-index: auto !important;
+  }
+  #page-inicio .entry-form .voice-help.hidden { display: none !important; }
+  #page-inicio .entry-actions.voice-actions,
+  #page-inicio.active .entry-actions.voice-actions {
+    order: 3 !important;
+    position: static !important;
+    inset: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    z-index: auto !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    gap: 20px !important;
+    margin: 12px 0 0 !important;
+    padding: 0 !important;
+    pointer-events: auto !important;
+  }
+  #page-inicio .entry-actions.voice-actions .round-action {
+    position: static !important;
+    flex: 0 0 58px !important;
+    width: 58px !important;
+    height: 58px !important;
+    min-height: 58px !important;
+    margin: 0 !important;
+    pointer-events: auto !important;
+  }
+  #page-inicio .assistant-card { padding-bottom: 14px !important; }
+  #page-inicio .welcome-row {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 42%) !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  #page-inicio .welcome-row > div,
+  #page-inicio .month-picker { min-width: 0 !important; }
+  #page-inicio .month-picker { width: 100% !important; max-width: 100% !important; }
+  #page-inicio .month-picker input {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    font-size: 13px !important;
+    padding: 9px 5px !important;
+    text-align: center !important;
+  }
+  #page-inicio .toast { z-index: 70 !important; }
+}
